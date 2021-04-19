@@ -1,0 +1,17 @@
+{
+  "name": "words-genius",
+  "version": "1.0.0",
+  "author": "Aleksy Wołowiec",
+  "homepage": "https://github.com/Aleeeksy/Words-Genius#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Aleeeksy/Words-Genius.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Aleeeksy/Words-Genius/issues"
+  },
+  "dependencies": {
+    "bootstrap": "^4.6.0",
+    "jquery": "^3.6.0"
+  }
+}
