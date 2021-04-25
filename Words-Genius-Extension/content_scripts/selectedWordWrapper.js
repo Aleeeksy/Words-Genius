@@ -4,25 +4,16 @@ const SELECTED_WORD_WRAPPER_CLASSNAME = "selected-word-wrapper";
 const SELECTED_WORD_WRAPPER_CLASS_SELECTOR = "." + SELECTED_WORD_WRAPPER_CLASSNAME;
 
 function showPopover(event) {
-    if (!event.target.closest(WORDS_GENIUS_POPOVER_CLASS_SELECTOR)) {
+    if (isEventOutsideOfPopover(event)) {
         hidePopover(event);
-        wrapSelectedWord();
 
-        $(
-            $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR)
-                .popover("show")
-                .data("bs.popover")
-                .tip
-        )
-            .addClass(WORDS_GENIUS_POPOVER_CLASSNAME);
-    }
-}
+        const selectedWord = getSelectedWord();
 
-function wrapSelectedWord() {
-    const selectedWord = getSelectedWord();
-
-    if (shouldWrapSelectedWord(selectedWord)) {
-        selectedWord.surroundContents(createWrapper());
+        if (selectedWord.toString().length > 1) {
+            wrapSelectedWord(selectedWord);
+            getWordInformation()
+            showPopoverAndAddCustomCssClass()
+        }
     }
 }
 
@@ -30,8 +21,8 @@ function getSelectedWord() {
     return window.getSelection().getRangeAt(0);
 }
 
-function shouldWrapSelectedWord(selectedWord) {
-    return selectedWord.toString().length > 1
+function wrapSelectedWord(selectedWord) {
+    selectedWord.surroundContents(createWrapper());
 }
 
 function createWrapper() {
@@ -44,8 +35,22 @@ function createWrapper() {
     return wrapper;
 }
 
+function getWordInformation(selectedWord) {
+    return browser.runtime.sendMessage({word: selectedWord});
+}
+
+function showPopoverAndAddCustomCssClass() {
+    $(
+        $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR)
+            .popover("show")
+            .data("bs.popover")
+            .tip
+    ).addClass(WORDS_GENIUS_POPOVER_CLASSNAME);
+}
+
+
 function hidePopover(event) {
-    if (!event.target.closest(WORDS_GENIUS_POPOVER_CLASS_SELECTOR)) {
+    if (isEventOutsideOfPopover(event)) {
         $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).popover("hide");
 
         document.querySelectorAll(SELECTED_WORD_WRAPPER_CLASS_SELECTOR)
@@ -54,6 +59,10 @@ function hidePopover(event) {
                 node.remove();
             })
     }
+}
+
+function isEventOutsideOfPopover(event) {
+    return !event.target.closest(WORDS_GENIUS_POPOVER_CLASS_SELECTOR);
 }
 
 function unwrapWord(node) {
