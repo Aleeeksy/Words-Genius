@@ -66,6 +66,5 @@ func prepareAndSendTransactionRequest(translationRequest *http.Request) (*http.R
 }
 
 func getApiKey() string {
-	log.Printf(os.Getenv("TRANSLATION_API_KEY"))
 	return os.Getenv("TRANSLATION_API_KEY")
 }
