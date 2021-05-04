@@ -1,42 +1,123 @@
+const PLAY_AUDIO_BUTTON_ID = "play-audio-button";
+const PLAY_AUDIO_BUTTON_SELECTOR = "#" + PLAY_AUDIO_BUTTON_ID;
 const WORDS_GENIUS_POPOVER_CLASSNAME = "words-genius-popover";
 const WORDS_GENIUS_POPOVER_CLASS_SELECTOR = "." + WORDS_GENIUS_POPOVER_CLASSNAME;
 const SELECTED_WORD_WRAPPER_CLASSNAME = "selected-word-wrapper";
 const SELECTED_WORD_WRAPPER_CLASS_SELECTOR = "." + SELECTED_WORD_WRAPPER_CLASSNAME;
 
-function showPopover(event) {
+function getDataAndShowPopover(event) {
     if (isEventOutsideOfPopover(event)) {
         hidePopover(event);
 
-        const selectedWord = getSelectedWord();
+        const selectedWordRange = getSelectedWordRange();
 
-        if (selectedWord.toString().length > 1) {
-            wrapSelectedWord(selectedWord);
-            getWordInformation()
+        if (selectedWordRange.toString().length > 1) {
+            wrapSelectedWord(selectedWordRange);
+            updatePopoverContent(selectedWordRange.toString());
             showPopoverAndAddCustomCssClass()
         }
     }
 }
 
-function getSelectedWord() {
+function getSelectedWordRange() {
     return window.getSelection().getRangeAt(0);
 }
 
-function wrapSelectedWord(selectedWord) {
-    selectedWord.surroundContents(createWrapper());
+function wrapSelectedWord(selectedWordRange) {
+    selectedWordRange.surroundContents(createWrapper());
 }
 
 function createWrapper() {
     const wrapper = document.createElement("span");
     wrapper.setAttribute("class", SELECTED_WORD_WRAPPER_CLASSNAME);
     wrapper.setAttribute("data-toggle", "popover");
+    wrapper.setAttribute("data-html", "true");
     wrapper.setAttribute("data-placement", "bottom");
-    wrapper.setAttribute("title", "Loading data");
+    wrapper.setAttribute("data-container", "body");
     wrapper.setAttribute("data-content", "Please Wait...");
+    wrapper.setAttribute("data-original-title", "Loading data");
     return wrapper;
 }
 
+function updatePopoverContent(selectedWord) {
+    getWordInformation(selectedWord)
+        .then((response) => {
+            const {title, content} = preparePopoverTitleAndContent(response);
+
+            $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-original-title", title);
+            $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-content", content);
+
+            reloadPopoverContent();
+        });
+}
+
 function getWordInformation(selectedWord) {
-    return browser.runtime.sendMessage({word: selectedWord});
+    return browser.runtime.sendMessage({word: selectedWord, time: Date.now()});
+}
+
+function preparePopoverTitleAndContent(response) {
+    if (!response.data || Object.keys(response.data).length === 0) {
+        return {
+            title: "Not found",
+            content: "Sorry, we couldn't find translation and definition for this word",
+        }
+    }
+    if (response.data.translationError && response.data.dictionaryError) {
+        return {
+            title: "Error",
+            content: "Sorry, error occurred when we try to retrieved word translation and definition",
+        }
+    }
+
+    const audioElement = document.createElement("audio")
+    audioElement.id = "word-pronunciation";
+    audioElement.src = response.data.phonetic.audio;
+    audioElement.type = "audio/mpeg";
+    document.body.appendChild(audioElement);
+
+    return {
+        title: `${response.data.phonetic.text} <a id="${PLAY_AUDIO_BUTTON_ID}"> <span class="volume-up-icon"/></a>`,
+        content: preparePopoverContent(response.data),
+    }
+}
+
+function preparePopoverContent(data) {
+    const items = [
+        {term: 'Translation', details: data.wordTranslations, order: 0},
+        {term: 'Part of speech', details: data.partOfSpeech, order: 1},
+        {term: 'Definition', details: data.definition, order: 2},
+        {term: 'Synonyms', details: data.synonyms?.join(', '), order: 3},
+    ]
+
+    const descriptions = document.createElement('div');
+
+    items.filter(e => e.details)
+        .sort((e1, e2) => e1.order - e2.order)
+        .forEach((item) => {
+            const descriptionTerm = document.createElement('div');
+            const descriptionDetails = document.createElement('div');
+            descriptions.appendChild(descriptionTerm);
+            descriptions.appendChild(descriptionDetails);
+
+            descriptionTerm.innerHTML = item.term;
+            descriptionTerm.setAttribute("class", "definition-term");
+
+            descriptionDetails.innerHTML = item.details;
+            descriptionDetails.setAttribute("class", "definition-details");
+        });
+
+    return descriptions.outerHTML;
+}
+
+
+function playAudio() {
+    const audioElement = document.getElementById("word-pronunciation");
+    audioElement.play();
+}
+
+function reloadPopoverContent() {
+    $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).popover("hide");
+    $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).popover("show");
 }
 
 function showPopoverAndAddCustomCssClass() {
@@ -48,10 +129,14 @@ function showPopoverAndAddCustomCssClass() {
     ).addClass(WORDS_GENIUS_POPOVER_CLASSNAME);
 }
 
-
 function hidePopover(event) {
     if (isEventOutsideOfPopover(event)) {
         $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).popover("hide");
+
+        document.querySelectorAll("#word-pronunciation")
+            .forEach(node => {
+                node.remove();
+            })
 
         document.querySelectorAll(SELECTED_WORD_WRAPPER_CLASS_SELECTOR)
             .forEach(node => {
@@ -72,6 +157,8 @@ function unwrapWord(node) {
     }
 }
 
-document.addEventListener("dblclick", e => showPopover(e));
+document.addEventListener("dblclick", e => getDataAndShowPopover(e));
 
 document.addEventListener("click", e => hidePopover(e));
+
+$('body').on('click', PLAY_AUDIO_BUTTON_SELECTOR, () => playAudio());

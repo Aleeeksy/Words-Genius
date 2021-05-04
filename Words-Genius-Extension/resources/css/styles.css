@@ -1,0 +1,27 @@
+.volume-up-icon {
+    width: 16px;
+    height: 16px;
+    display: inline-block;
+    background: url('/resources/icons/volume-up.svg') no-repeat top left;
+}
+
+#play-audio-button {
+    opacity: 0.5;
+    filter: alpha(opacity=40);
+}
+
+#play-audio-button:hover {
+    opacity: 1.0;
+    filter: alpha(opacity=100);
+}
+
+.definition-term {
+    font-weight: bold;
+}
+
+.definition-details {
+    font-style:italic;
+    margin-left: 1.5rem;
+    margin-bottom: 0.75em;
+}
+

@@ -9,9 +9,10 @@ const DEFINITION_ERROR_MSG = "Error occurred when we try to find a word definiti
 const NO_DEFINITION_TITLE = "No Definition Found";
 const NO_DEFINITION_MSG = "Sorry, we couldn't find definition for this word";
 
-browser.runtime.onMessage.addListener((listener) => getWordInformation(listener))
+browser.runtime.onMessage
+    .addListener((request, sender, sendResponse) => getWordInformation(request, sendResponse))
 
-function getWordInformation({request}) {
+function getWordInformation(request, sendResponse) {
     const wordDictionary = fetch(DICTIONARY_URL, {
         method: 'POST',
         credentials: 'omit',
@@ -30,7 +31,9 @@ function getWordInformation({request}) {
 
     Promise.all([wordDictionary, wordTranslation])
         .then(results => ({...results[0], ...results[1]}))
-        .then(data => console.log(data))
+        .then(data => sendResponse({data}));
+
+    return true;
 }
 
 prepareHeaders = () => {
@@ -55,14 +58,14 @@ function handleDictionaryResponse(response) {
             }
 
             return Promise.resolve({
-                word: responseBody.data.dictionary.word,
+                word: responseBody.data.dictionary?.word,
                 phonetic: {
-                    text: responseBody.data.dictionary.phonetics[0].text,
-                    audio: responseBody.data.dictionary.phonetics[0].audio,
+                    text: responseBody.data.dictionary?.phonetics[0]?.text,
+                    audio: responseBody.data.dictionary?.phonetics[0]?.audio,
                 },
-                partOfSpeech: responseBody.data.dictionary.meanings[0].partOfSpeech,
-                definition: responseBody.data.dictionary.meanings[0].definitions[0].definition,
-                synonyms: responseBody.data.dictionary.meanings[0].definitions[0].synonyms
+                partOfSpeech: responseBody.data.dictionary?.meanings[0]?.partOfSpeech,
+                definition: responseBody.data.dictionary?.meanings[0]?.definitions[0]?.definition,
+                synonyms: responseBody.data.dictionary?.meanings[0]?.definitions[0]?.synonyms
             })
         });
     }
@@ -90,7 +93,7 @@ function handleTranslationResponse(response) {
             }
 
             return Promise.resolve({
-                wordTranslations: responseBody.data.translations.map(translation => translation.translatedText)
+                wordTranslations: responseBody.data.translations?.map(translation => translation.translatedText)
             })
         });
     }
