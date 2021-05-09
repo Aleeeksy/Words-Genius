@@ -28,7 +28,6 @@ function populateOptions() {
 
     browser.storage.sync.get(USER_OPTIONS)
         .then(res => {
-            console.log(res.userOptions);
             if (res?.userOptions?.popoverSections) {
                 new agGrid.Grid(eGridDiv, gridOptions(res.userOptions.popoverSections));
             } else {
@@ -54,7 +53,7 @@ function updateSectionVisibility(data) {
     browser.storage.sync.get(USER_OPTIONS)
         .then(res => {
             if (res?.userOptions?.popoverSections) {
-                const popoverSections = res.userOptions?.popoverSections.map(row => row === data ? data : row);
+                const popoverSections = res.userOptions?.popoverSections.map(row => row.value === data.value ? data : row);
 
                 browser.storage.sync.set({userOptions: {...res.userOptions, popoverSections}});
             }
