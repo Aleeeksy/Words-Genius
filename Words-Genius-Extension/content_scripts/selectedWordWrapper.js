@@ -39,23 +39,21 @@ function createWrapper() {
     return wrapper;
 }
 
-function updatePopoverContent(selectedWord) {
-    getWordInformation(selectedWord)
-        .then((response) => {
-            const {title, content} = preparePopoverTitleAndContent(response);
+async function updatePopoverContent(selectedWord) {
+    const response = await getWordInformation(selectedWord)
+    const {title, content} = await preparePopoverTitleAndContent(response);
 
-            $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-original-title", title);
-            $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-content", content);
+    $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-original-title", title);
+    $(SELECTED_WORD_WRAPPER_CLASS_SELECTOR).attr("data-content", content);
 
-            reloadPopoverContent();
-        });
+    reloadPopoverContent();
 }
 
 function getWordInformation(selectedWord) {
     return browser.runtime.sendMessage({word: selectedWord, time: Date.now()});
 }
 
-function preparePopoverTitleAndContent(response) {
+async function preparePopoverTitleAndContent(response) {
     if (!response.data || Object.keys(response.data).length === 0) {
         return {
             title: "Not found",
@@ -77,21 +75,41 @@ function preparePopoverTitleAndContent(response) {
 
     return {
         title: `${response.data.phonetic.text} <a id="${PLAY_AUDIO_BUTTON_ID}"> <span class="volume-up-icon"/></a>`,
-        content: preparePopoverContent(response.data),
+        content: await preparePopoverContent(response.data),
     }
 }
 
-function preparePopoverContent(data) {
-    const items = [
-        {term: 'Translation', details: data.wordTranslations, order: 0},
-        {term: 'Part of speech', details: data.partOfSpeech, order: 1},
-        {term: 'Definition', details: data.definition, order: 2},
-        {term: 'Synonyms', details: data.synonyms?.join(', '), order: 3},
-    ]
+async function preparePopoverContent(data) {
+    const result = await browser.storage.sync.get(USER_OPTIONS);
+    const sections = result?.userOptions?.popoverSections ? result.userOptions.popoverSections : DEFAULT_POPOVER_SECTIONS;
 
+    const popoverSections = preparePopoverSections(sections, data);
+
+    return preparePopoverContentHtmlElements(popoverSections);
+}
+
+function preparePopoverSections(sections, data) {
+    return sections.map(section => {
+        if (section.value === TRANSLATION) {
+            return {...section, term: 'Translation', details: data.wordTranslations}
+        }
+        if (section.value === PART_OF_SPEECH) {
+            return {...section, term: 'Part of speech', details: data.partOfSpeech}
+        }
+        if (section.value === DEFINITION) {
+            return {...section, term: 'Definition', details: data.definition}
+        }
+        if (section.value === SYNONYMS) {
+            return {...section, term: 'Synonyms', details: data.synonyms?.join(', ')}
+        }
+    });
+}
+
+function preparePopoverContentHtmlElements(popoverSections) {
     const descriptions = document.createElement('div');
 
-    items.filter(e => e.details)
+    popoverSections.filter(e => e.details)
+        .filter(e => e.visible)
         .sort((e1, e2) => e1.order - e2.order)
         .forEach((item) => {
             const descriptionTerm = document.createElement('div');
@@ -157,7 +175,14 @@ function unwrapWord(node) {
     }
 }
 
-document.addEventListener("dblclick", e => getDataAndShowPopover(e));
+document.addEventListener("dblclick", e => {
+    browser.storage.sync.get(USER_OPTIONS).then((result) => {
+        const activationKey = result?.userOptions?.activationKey ? result.userOptions.activationKey : DEFAULT_ACTIVATION_KEY;
+        if(e[`${activationKey}Key`]) {
+            return getDataAndShowPopover(e);
+        }
+    });
+});
 
 document.addEventListener("click", e => hidePopover(e));
 
