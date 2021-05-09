@@ -24,6 +24,7 @@
       "js": [
         "node_modules/jquery/dist/jquery.min.js",
         "node_modules/bootstrap/dist/js/bootstrap.bundle.min.js",
+        "common/constants.js",
         "content_scripts/selectedWordWrapper.js"
       ],
       "css": [
@@ -33,7 +34,22 @@
     }
   ],
 
+  "options_ui": {
+    "page": "options/options.html",
+    "browser_style": true,
+    "chrome_style": true
+  },
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{27bf5147-359a-4a20-b19e-5917ecc4a4c2}"
+    }
+  },
+
   "permissions": [
+    "storage",
     "https://europe-west3-words-genius.cloudfunctions.net/"
-  ]
+  ],
+
+  "content_security_policy": "script-src 'self' https://unpkg.com/ag-grid-community/dist/ag-grid-community.min.js https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js https://code.jquery.com/jquery-2.2.4.min.js; object-src 'self'"
 }
