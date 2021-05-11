@@ -22,9 +22,9 @@ function populateOptions() {
 
 function setSavedActivationKey() {
     browser.storage.sync.get(USER_OPTIONS)
-        .then(res => {
-            if (res?.userOptions?.activationKey) {
-                document.querySelector(ACTIVATION_KEY_SELECTOR).value = res.userOptions.activationKey
+        .then(result => {
+            if (result?.userOptions?.activationKey) {
+                document.querySelector(ACTIVATION_KEY_SELECTOR).value = result.userOptions.activationKey
             }
         });
 }
@@ -32,7 +32,7 @@ function setSavedActivationKey() {
 
 function saveActivationKey(keyValue) {
     browser.storage.sync.get(USER_OPTIONS)
-        .then(res => browser.storage.sync.set({userOptions: {...res.userOptions, activationKey: keyValue}}));
+        .then(result => browser.storage.sync.set({userOptions: {...result.userOptions, activationKey: keyValue}}));
 }
 
 $(ACTIVATION_KEY_SELECTOR).change(function () {

@@ -13,3 +13,35 @@ const DEFAULT_POPOVER_SECTIONS = [
     {section: "Definition", value: DEFINITION, visible: true, order: 2},
     {section: "Synonyms", value: SYNONYMS, visible: true, order: 3}
 ];
+
+const DEFINITION_LANGUAGES = [
+    {key: 'en', name: 'English'},
+    {key: 'de', name: 'German'},
+    {key: 'es', name: 'Spanish'},
+    {key: 'fr', name: 'French'}
+]
+
+const TRANSLATION_LANGUAGES = [
+    ...DEFINITION_LANGUAGES,
+    {key: 'pl', name: 'Polish'}
+]
+
+const DEFAULT_LANGUAGES_OPTIONS = [
+    {
+        language: {key: 'en', name: 'English'},
+        definitionLanguage: {key: 'en', name: 'English'},
+        translationLanguage: {key: 'pl', name: 'Polish'}
+    }, {
+        language: {key: 'de', name: 'German'},
+        definitionLanguage: {key: 'de', name: 'German'},
+        translationLanguage: {key: 'pl', name: 'Polish'}
+    }, {
+        language: {key: 'es', name: 'Spanish'},
+        definitionLanguage: {key: 'es', name: 'Spanish'},
+        translationLanguage: {key: 'pl', name: 'Polish'}
+    }, {
+        language: {key: 'fr', name: 'French'},
+        definitionLanguage: {key: 'fr', name: 'French'},
+        translationLanguage: {key: 'pl', name: 'Polish'}
+    }
+]

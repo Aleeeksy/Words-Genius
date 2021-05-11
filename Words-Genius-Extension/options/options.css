@@ -41,3 +41,7 @@
 .grid-cell-centered {
     text-align: center;
 }
+
+.default-language-wrapper {
+    margin-bottom: 2rem;
+}

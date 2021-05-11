@@ -55,7 +55,11 @@
                     </div>
                     <div id="collapseThree" class="panel-collapse collapse" role="tabpanel" aria-labelledby="headingThree">
                         <div class="panel-body">
+                            <div class="default-language-wrapper">
+                                <b>Default language: </b><select id="default-language"></select>
+                            </div>
 
+                            <div id="languages-options-grid" style="width:605px;" class="ag-theme-alpine"></div>
                         </div>
                     </div>
                 </div>
@@ -64,8 +68,10 @@
 
         <script src="../common/constants.js"></script>
         <script src="./cellRenders/CheckboxRenderer.js"></script>
+        <script src="./cellRenders/TranslationLanguageDropdownRenderer.js"></script>
         <script src="./collapseUtility.js"></script>
         <script src="./activationActionOptions.js"></script>
         <script src="./popoverContentOptions.js"></script>
+        <script src="./languageOptions.js"></script>
     </body>
 </html>

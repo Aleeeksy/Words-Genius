@@ -18,7 +18,7 @@ const gridOptions = (rowData) => ({
     },
     domLayout: 'autoHeight',
     onRowDragEnd: ({api}) => {
-        updateSectionOrder(api.getModel().rowsToDisplay);
+        saveSectionOrder(api.getModel().rowsToDisplay);
         api.refreshCells()
     },
 });
@@ -27,14 +27,14 @@ function populateOptions() {
     const eGridDiv = document.querySelector('#popover-content-options-grid');
 
     browser.storage.sync.get(USER_OPTIONS)
-        .then(res => {
-            if (res?.userOptions?.popoverSections) {
-                new agGrid.Grid(eGridDiv, gridOptions(res.userOptions.popoverSections));
+        .then(result => {
+            if (result?.userOptions?.popoverSections) {
+                new agGrid.Grid(eGridDiv, gridOptions(result.userOptions.popoverSections));
             } else {
                 new agGrid.Grid(eGridDiv, gridOptions(DEFAULT_POPOVER_SECTIONS));
                 browser.storage.sync.set({
                     userOptions: {
-                        ...res.userOptions,
+                        ...result.userOptions,
                         popoverSections: DEFAULT_POPOVER_SECTIONS
                     }
                 });
@@ -42,20 +42,20 @@ function populateOptions() {
         });
 }
 
-function updateSectionOrder(rows) {
+function saveSectionOrder(rows) {
     const popoverSections = rows.map(row => ({...row.data, order: row.rowIndex}));
 
     browser.storage.sync.get(USER_OPTIONS)
-        .then(res => browser.storage.sync.set({userOptions: {...res.userOptions, popoverSections}}));
+        .then(result => browser.storage.sync.set({userOptions: {...result.userOptions, popoverSections}}));
 }
 
-function updateSectionVisibility(data) {
+function saveSectionVisibility(data) {
     browser.storage.sync.get(USER_OPTIONS)
-        .then(res => {
-            if (res?.userOptions?.popoverSections) {
-                const popoverSections = res.userOptions?.popoverSections.map(row => row.value === data.value ? data : row);
+        .then(result => {
+            if (result?.userOptions?.popoverSections) {
+                const popoverSections = result.userOptions?.popoverSections.map(row => row.value === data.value ? data : row);
 
-                browser.storage.sync.set({userOptions: {...res.userOptions, popoverSections}});
+                browser.storage.sync.set({userOptions: {...result.userOptions, popoverSections}});
             }
         });
 }

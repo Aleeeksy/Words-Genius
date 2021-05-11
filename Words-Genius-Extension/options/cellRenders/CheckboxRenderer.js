@@ -15,7 +15,7 @@ class CheckboxRenderer {
         const colId = this.params.column.colId;
         this.params.node.setDataValue(colId, checked);
 
-        updateSectionVisibility(this.params.data);
+        saveSectionVisibility(this.params.data);
     }
 
     getGui() {
