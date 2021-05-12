@@ -19,16 +19,14 @@ function getWordInformation(request, sendResponse) {
             credentials: 'omit',
             headers: prepareHeaders(),
             body: JSON.stringify(prepareDictionaryRequestBody(request.word, language.key))
-        })
-            .then(response => handleDictionaryResponse(response));
+        }).then(response => handleDictionaryResponse(response));
 
         const wordTranslation = fetch(TRANSLATION_URL, {
             method: 'POST',
             credentials: 'omit',
             headers: prepareHeaders(),
             body: JSON.stringify(prepareTranslationRequestBody(request.word, language.key, translationLanguage.key))
-        })
-            .then(response => handleTranslationResponse(response));
+        }).then(response => handleTranslationResponse(response));
 
         Promise.all([wordDictionary, wordTranslation])
             .then(results => ({...results[0], ...results[1]}))
