@@ -57,9 +57,8 @@ function setSavedDefaultLanguage(result) {
     if (result?.userOptions?.defaultLanguage) {
         document.querySelector(DEFAULT_LANGUAGE_SELECTOR).value = result.userOptions.defaultLanguage.key;
     } else {
-        const english = DEFINITION_LANGUAGES.find(language => language.key === 'en');
-        document.querySelector(DEFAULT_LANGUAGE_SELECTOR).value = english.key;
-        browser.storage.sync.set({userOptions: {...result.userOptions, defaultLanguage: english}});
+        document.querySelector(DEFAULT_LANGUAGE_SELECTOR).value = DEFAULT_LANGUAGE.key;
+        browser.storage.sync.set({userOptions: {...result.userOptions, defaultLanguage: DEFAULT_LANGUAGE}});
     }
 }
 

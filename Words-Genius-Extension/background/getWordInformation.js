@@ -13,27 +13,40 @@ browser.runtime.onMessage
     .addListener((request, sender, sendResponse) => getWordInformation(request, sendResponse))
 
 function getWordInformation(request, sendResponse) {
-    const wordDictionary = fetch(DICTIONARY_URL, {
-        method: 'POST',
-        credentials: 'omit',
-        headers: prepareHeaders(),
-        body: JSON.stringify(prepareDictionaryRequestBody(request.word, 'en'))
-    })
-        .then(response => handleDictionaryResponse(response));
+    getLanguages().then(({language, translationLanguage}) => {
+        const wordDictionary = fetch(DICTIONARY_URL, {
+            method: 'POST',
+            credentials: 'omit',
+            headers: prepareHeaders(),
+            body: JSON.stringify(prepareDictionaryRequestBody(request.word, language.key))
+        })
+            .then(response => handleDictionaryResponse(response));
 
-    const wordTranslation = fetch(TRANSLATION_URL, {
-        method: 'POST',
-        credentials: 'omit',
-        headers: prepareHeaders(),
-        body: JSON.stringify(prepareTranslationRequestBody(request.word, 'en', 'pl'))
-    })
-        .then(response => handleTranslationResponse(response));
+        const wordTranslation = fetch(TRANSLATION_URL, {
+            method: 'POST',
+            credentials: 'omit',
+            headers: prepareHeaders(),
+            body: JSON.stringify(prepareTranslationRequestBody(request.word, language.key, translationLanguage.key))
+        })
+            .then(response => handleTranslationResponse(response));
 
-    Promise.all([wordDictionary, wordTranslation])
-        .then(results => ({...results[0], ...results[1]}))
-        .then(data => sendResponse({data}));
+        Promise.all([wordDictionary, wordTranslation])
+            .then(results => ({...results[0], ...results[1]}))
+            .then(data => sendResponse({data}));
+    })
 
     return true;
+}
+
+async function getLanguages() {
+    const result = await browser.storage.sync.get(USER_OPTIONS);
+
+    const languagesOptions = result?.userOptions?.languages ? result.userOptions.languages : DEFAULT_LANGUAGES_OPTIONS;
+    const defaultLanguage = result?.userOptions?.defaultLanguage ? result.userOptions.defaultLanguage : DEFAULT_LANGUAGE;
+
+    const languageOptions = languagesOptions.find(option => option.language.key === defaultLanguage.key);
+
+    return {language: languageOptions.language, translationLanguage: languageOptions.translationLanguage};
 }
 
 prepareHeaders = () => {

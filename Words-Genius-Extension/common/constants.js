@@ -26,6 +26,8 @@ const TRANSLATION_LANGUAGES = [
     {key: 'pl', name: 'Polish'}
 ]
 
+const DEFAULT_LANGUAGE = {key: 'en', name: 'English'}
+
 const DEFAULT_LANGUAGES_OPTIONS = [
     {
         language: {key: 'en', name: 'English'},

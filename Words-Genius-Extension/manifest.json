@@ -12,6 +12,7 @@
 
   "background": {
     "scripts": [
+      "common/constants.js",
       "background/getWordInformation.js"
     ]
   },
