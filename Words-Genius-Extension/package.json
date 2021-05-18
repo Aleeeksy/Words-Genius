@@ -13,6 +13,7 @@
   "dependencies": {
     "bootstrap": "^4.6.0",
     "jquery": "^3.6.0",
-    "node-fetch": "^2.6.1"
+    "node-fetch": "^2.6.1",
+    "webextension-polyfill": "^0.8.0"
   }
 }
